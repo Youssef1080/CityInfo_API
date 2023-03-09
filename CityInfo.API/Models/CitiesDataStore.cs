@@ -33,6 +33,6 @@
             },
         };
 
-        public static CitiesDataStore Current { get; set; } = new CitiesDataStore();
+        //public static CitiesDataStore Current { get; set; } = new CitiesDataStore();
     }
 }

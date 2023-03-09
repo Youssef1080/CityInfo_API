@@ -1,4 +1,5 @@
 ﻿using CityInfo.API.Models;
+using CityInfo.API.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -9,29 +10,49 @@ namespace CityInfo.API.Controllers
     [Route("api/cities")]
     public class CitiesController : ControllerBase
     {
+        private readonly ILogger<CitiesController> logger;
+        private readonly IMailService localMail;
+        private readonly CitiesDataStore dataStore;
+
+        public CitiesController(ILogger<CitiesController> logger, IMailService localMail, CitiesDataStore dataStore)
+        {
+            this.logger = logger;
+            this.localMail = localMail;
+            this.dataStore = dataStore;
+        }
+
         [HttpGet]
         public ActionResult<IEnumerable<CityModel>> GetCities()
         {
-            return Ok(CitiesDataStore.Current.Cities);
+            return Ok(dataStore.Cities);
         }
 
         [HttpGet("{id}", Name = "GetCity")]
         public ActionResult<CityModel> GetCity(int id)
         {
-            var city = CitiesDataStore.Current.Cities.FirstOrDefault(x => x.Id == id);
-
-            if (city == null)
+            try
             {
-                return NotFound();
-            }
+                var city = dataStore.Cities.FirstOrDefault(x => x.Id == id);
 
-            return Ok(city);
+                if (city == null)
+                {
+                    logger.LogInformation($"this is error there is no city with this id: [{id}]");
+                    return NotFound();
+                }
+
+                return Ok(city);
+            }
+            catch (Exception ex)
+            {
+                logger.LogCritical(ex.Message);
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost]
         public ActionResult AddCity(JsonPatchDocument<CityCreationModel> cityPatch)
         {
-            int cityId = CitiesDataStore.Current.Cities.Max(c => c.Id);
+            int cityId = dataStore.Cities.Max(c => c.Id);
             cityId += 1;
 
             var creationCity = new CityCreationModel();
@@ -56,7 +77,7 @@ namespace CityInfo.API.Controllers
                 PointsOfInteristsList = creationCity.PointsOfInteristsList
             };
 
-            CitiesDataStore.Current.Cities.Add(returnedCity);
+            dataStore.Cities.Add(returnedCity);
 
             return CreatedAtRoute("GetCity", new { id = returnedCity.Id }, returnedCity);
         }
@@ -64,7 +85,7 @@ namespace CityInfo.API.Controllers
         [HttpPut("{id}")]
         public ActionResult UpdateCity(int id, CityUpdate cityUpdate)
         {
-            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == id);
+            var city = dataStore.Cities.FirstOrDefault(c => c.Id == id);
             if (city == null)
             {
                 return NotFound();
@@ -80,7 +101,7 @@ namespace CityInfo.API.Controllers
         [HttpPatch("{id}")]
         public ActionResult PartiallyUpdateCity(int id, JsonPatchDocument<CityUpdate> cityPatch)
         {
-            var creationCity = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == id);
+            var creationCity = dataStore.Cities.FirstOrDefault(c => c.Id == id);
             if (creationCity == null)
             {
                 return NotFound();
@@ -115,14 +136,14 @@ namespace CityInfo.API.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteCity(int id)
         {
-            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == id);
+            var city = dataStore.Cities.FirstOrDefault(c => c.Id == id);
             if (city == null)
             {
                 return NotFound();
             }
 
-            CitiesDataStore.Current.Cities.Remove(city);
-
+            dataStore.Cities.Remove(city);
+            localMail.Send($"the city [{city.Name}] with id: ({city.Id}) was removed.", "city deleted");
             return NoContent();
         }
     }
