@@ -1,5 +1,8 @@
-﻿using CityInfo.API.Models;
+﻿using AutoMapper;
+using CityInfo.API.Entities;
+using CityInfo.API.Models;
 using CityInfo.API.Services;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -12,27 +15,31 @@ namespace CityInfo.API.Controllers
     {
         private readonly ILogger<CitiesController> logger;
         private readonly IMailService localMail;
-        private readonly CitiesDataStore dataStore;
+        private readonly ICityInfoRepository cityInfoRepository;
+        private readonly IMapper mapper;
 
-        public CitiesController(ILogger<CitiesController> logger, IMailService localMail, CitiesDataStore dataStore)
+        public CitiesController(ILogger<CitiesController> logger, IMailService localMail, ICityInfoRepository cityInfoRepository, IMapper mapper)
         {
             this.logger = logger;
             this.localMail = localMail;
-            this.dataStore = dataStore;
+            this.cityInfoRepository = cityInfoRepository;
+            this.mapper = mapper;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<CityModel>> GetCities()
+        public async Task<ActionResult<IEnumerable<CityWithoutPointModel>>> GetCities(string? name)
         {
-            return Ok(dataStore.Cities);
+            var cityEntities = await cityInfoRepository.GetCitiesAsync(name);
+
+            return Ok(mapper.Map<IEnumerable<CityWithoutPointModel>>(cityEntities));
         }
 
         [HttpGet("{id}", Name = "GetCity")]
-        public ActionResult<CityModel> GetCity(int id)
+        public async Task<IActionResult> GetCity(int id, bool includePoint = false)
         {
             try
             {
-                var city = dataStore.Cities.FirstOrDefault(x => x.Id == id);
+                var city = await cityInfoRepository.GetCityAsync(id, includePoint);
 
                 if (city == null)
                 {
@@ -40,7 +47,12 @@ namespace CityInfo.API.Controllers
                     return NotFound();
                 }
 
-                return Ok(city);
+                if (includePoint)
+                {
+                    return Ok(mapper.Map<CityModel>(city));
+                }
+
+                return Ok(mapper.Map<CityWithoutPointModel>(city));
             }
             catch (Exception ex)
             {
@@ -50,69 +62,55 @@ namespace CityInfo.API.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddCity(JsonPatchDocument<CityCreationModel> cityPatch)
+        public async Task<ActionResult> AddCity(CityCreationModel city)
         {
-            int cityId = dataStore.Cities.Max(c => c.Id);
-            cityId += 1;
+            var entity = mapper.Map<City>(city);
 
-            var creationCity = new CityCreationModel();
+            cityInfoRepository.AddCity(entity);
 
-            cityPatch.ApplyTo(creationCity, ModelState);
-
-            if (!ModelState.IsValid)
+            if (!await cityInfoRepository.SaveChangesAsync())
             {
-                return BadRequest(ModelState);
+                return BadRequest();
             }
 
-            if (TryValidateModel(creationCity))
-            {
-                return BadRequest(ModelState);
-            }
+            var output = mapper.Map<CityModel>(entity);
 
-            var returnedCity = new CityModel
-            {
-                Id = cityId,
-                Name = creationCity.Name,
-                Description = creationCity.Description,
-                PointsOfInteristsList = creationCity.PointsOfInteristsList
-            };
-
-            dataStore.Cities.Add(returnedCity);
-
-            return CreatedAtRoute("GetCity", new { id = returnedCity.Id }, returnedCity);
+            return CreatedAtRoute("GetCity", new { id = output.Id }, output);
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateCity(int id, CityUpdate cityUpdate)
+        public async Task<ActionResult> UpdateCity(int id, CityUpdate cityUpdate)
         {
-            var city = dataStore.Cities.FirstOrDefault(c => c.Id == id);
-            if (city == null)
+            if (!await cityInfoRepository.IsCityExist(id))
             {
                 return NotFound();
             }
 
-            city.Name = cityUpdate.Name;
-            city.Description = cityUpdate.Description;
-            city.PointsOfInteristsList = cityUpdate.PointsOfInteristsList;
+            var entity = await cityInfoRepository.GetCityAsync(id, true);
+
+            mapper.Map(cityUpdate, entity);
+
+            if (!await cityInfoRepository.SaveChangesAsync())
+            {
+                return BadRequest();
+            }
 
             return NoContent();
         }
 
         [HttpPatch("{id}")]
-        public ActionResult PartiallyUpdateCity(int id, JsonPatchDocument<CityUpdate> cityPatch)
+        public async Task<ActionResult> PartiallyUpdateCity(int id, JsonPatchDocument<CityUpdate> cityPatch)
         {
-            var creationCity = dataStore.Cities.FirstOrDefault(c => c.Id == id);
-            if (creationCity == null)
+            if (!await cityInfoRepository.IsCityExist(id))
             {
                 return NotFound();
             }
 
-            var cityToUpdate = new CityUpdate
-            {
-                Name = creationCity.Name,
-                Description = creationCity.Description,
-                PointsOfInteristsList = creationCity.PointsOfInteristsList
-            };
+            var entity = await cityInfoRepository.GetCityAsync(id, true);
+
+            var cityToUpdate = new CityUpdate();
+
+            mapper.Map(entity, cityToUpdate);
 
             cityPatch.ApplyTo(cityToUpdate, ModelState);
 
@@ -126,23 +124,33 @@ namespace CityInfo.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            creationCity.Name = cityToUpdate.Name;
-            creationCity.Description = cityToUpdate.Description;
-            creationCity.PointsOfInteristsList = cityToUpdate.PointsOfInteristsList;
+            mapper.Map(cityToUpdate, entity);
+
+            if (!await cityInfoRepository.SaveChangesAsync())
+            {
+                return BadRequest();
+            }
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public ActionResult DeleteCity(int id)
+        public async Task<ActionResult> DeleteCity(int id)
         {
-            var city = dataStore.Cities.FirstOrDefault(c => c.Id == id);
-            if (city == null)
+            if (!await cityInfoRepository.IsCityExist(id))
             {
                 return NotFound();
             }
 
-            dataStore.Cities.Remove(city);
+            var city = await cityInfoRepository.GetCityAsync(id, false);
+
+            cityInfoRepository.RemoveCity(city);
+
+            if (!await cityInfoRepository.SaveChangesAsync())
+            {
+                BadRequest();
+            }
+
             localMail.Send($"the city [{city.Name}] with id: ({city.Id}) was removed.", "city deleted");
             return NoContent();
         }
