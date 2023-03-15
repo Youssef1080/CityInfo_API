@@ -14,7 +14,7 @@
         public void Send(string message, string subject)
         {
             Console.WriteLine($"Mail From {mailFrom} to {mailTo}, " +
-                $"with {nameof(LocalMailService)}.");
+                $"with {nameof(CloudMailService)}.");
             Console.WriteLine($"Subject: {subject}");
             Console.WriteLine($"Message: {message}");
         }
