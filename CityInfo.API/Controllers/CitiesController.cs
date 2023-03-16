@@ -2,6 +2,7 @@
 using CityInfo.API.Entities;
 using CityInfo.API.Models;
 using CityInfo.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
@@ -14,6 +15,7 @@ namespace CityInfo.API.Controllers
 {
     [ApiController]
     [Route("api/cities")]
+    [Authorize]
     public class CitiesController : ControllerBase
     {
         private readonly ILogger<CitiesController> logger;
