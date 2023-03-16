@@ -25,5 +25,7 @@ namespace CityInfo.API.Services
         public Task<bool> SaveChangesAsync();
 
         public Task<bool> IsCityExist(int cityId);
+
+        public Task<User> AuthenticateUser(string? username, string? password);
     }
 }

@@ -100,5 +100,12 @@ namespace CityInfo.API.Services
         {
             return await context.Cities.AnyAsync(c => c.Id == cityId);
         }
+
+        public async Task<User> AuthenticateUser(string? username, string? password)
+        {
+            var user = await context.Users.Where(u => u.UserName == username && u.Password == password).FirstOrDefaultAsync();
+
+            return user;
+        }
     }
 }
