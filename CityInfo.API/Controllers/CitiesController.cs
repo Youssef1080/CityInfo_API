@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+
+//using Newtonsoft.Json;
 
 namespace CityInfo.API.Controllers
 {
@@ -18,6 +21,8 @@ namespace CityInfo.API.Controllers
         private readonly ICityInfoRepository cityInfoRepository;
         private readonly IMapper mapper;
 
+        private const int maxSize = 20;
+
         public CitiesController(ILogger<CitiesController> logger, IMailService localMail, ICityInfoRepository cityInfoRepository, IMapper mapper)
         {
             this.logger = logger;
@@ -27,9 +32,16 @@ namespace CityInfo.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CityWithoutPointModel>>> GetCities(string? name)
+        public async Task<ActionResult<IEnumerable<CityWithoutPointModel>>> GetCities(string? name, string? searchQuery, int pageNumber = 1, int pageSize = 10)
         {
-            var cityEntities = await cityInfoRepository.GetCitiesAsync(name);
+            if (pageSize > maxSize)
+            {
+                pageSize = maxSize;
+            }
+
+            var (cityEntities, pagination) = await cityInfoRepository.GetCitiesAsync(name, searchQuery, pageNumber, pageSize);
+
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
 
             return Ok(mapper.Map<IEnumerable<CityWithoutPointModel>>(cityEntities));
         }

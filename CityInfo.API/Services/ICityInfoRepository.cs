@@ -8,7 +8,7 @@ namespace CityInfo.API.Services
 
         public Task<City?> GetCityAsync(int cityId, bool getPoint);
 
-        public Task<IEnumerable<City>> GetCitiesAsync(string? name);
+        public Task<(IEnumerable<City>, PaginationMetadata)> GetCitiesAsync(string? name, string? searchQuery, int pageNumber, int pageSize);
 
         public void AddCity(City city);
 

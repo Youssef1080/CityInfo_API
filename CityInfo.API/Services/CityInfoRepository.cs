@@ -18,16 +18,35 @@ namespace CityInfo.API.Services
             return await context.Cities.OrderBy(c => c.Name).ToListAsync();
         }
 
-        public async Task<IEnumerable<City>> GetCitiesAsync(string? name)
+        public async Task<(IEnumerable<City>, PaginationMetadata)> GetCitiesAsync(string? name, string? searchQuery, int pageNumber, int pageSize)
         {
-            if (string.IsNullOrEmpty(name))
+            var collection = context.Cities as IQueryable<City>;
+
+            if (!string.IsNullOrEmpty(name))
             {
-                return await GetCitiesAsync();
+                name = name.ToLower().Replace(" ", "");
+
+                collection = collection.Where(c => c.Name.ToLower().Replace(" ", "") == name);
+
+                //return await collection.Skip(pageSize * (pageNumber - 1)).Take(pageSize).OrderBy(c => c.Name).ToListAsync();
             }
 
-            name = name.ToLower().Replace(" ", "");
+            if ((!string.IsNullOrEmpty(searchQuery) && !string.IsNullOrEmpty(name)) || !string.IsNullOrEmpty(searchQuery))
+            {
+                //collection = context.Cities as IQueryable<City>;
 
-            return await context.Cities.Where(c => c.Name.ToLower().Replace(" ", "") == name).OrderBy(c => c.Name).ToListAsync();
+                searchQuery = searchQuery.ToLower().Trim();
+
+                collection = collection.Where(c => (c.Name.ToLower().Contains(searchQuery))
+                || (c.Description != null && c.Description.ToLower().Contains(searchQuery))
+                );
+            }
+
+            PaginationMetadata pagination = new PaginationMetadata(pageNumber, await collection.CountAsync(), pageSize);
+
+            var output = await collection.Skip(pageSize * (pageNumber - 1)).Take(pageSize).OrderBy(c => c.Name).ToListAsync();
+
+            return (output, pagination);
         }
 
         public async Task<City?> GetCityAsync(int cityId, bool getPoint)
