@@ -2,6 +2,7 @@
 using CityInfo.API.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CityInfo.API.Migrations
 {
     [DbContext(typeof(CityDBContext))]
-    partial class CityDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230316113546_AddUserTable")]
+    partial class AddUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.3");
@@ -108,10 +111,6 @@ namespace CityInfo.API.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -127,7 +126,6 @@ namespace CityInfo.API.Migrations
                             City = "Cairo",
                             FirstName = "Youssef",
                             LastName = "Ahmed",
-                            Password = "Pwd123.",
                             UserName = "Youssef$Ahmed"
                         });
                 });

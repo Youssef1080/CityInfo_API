@@ -41,6 +41,16 @@ namespace CityInfo.API.DBContexts
                         CityId = 1,
                     }
                 );
+
+            modelBuilder.Entity<User>().HasData(new User()
+            {
+                Id = 1,
+                FirstName = "Youssef",
+                LastName = "Ahmed",
+                UserName = "Youssef$Ahmed",
+                Password = "Pwd123.",
+                City = "Cairo"
+            });
         }
 
         public CityDBContext(DbContextOptions<CityDBContext> options)
@@ -50,5 +60,6 @@ namespace CityInfo.API.DBContexts
 
         public DbSet<City> Cities { get; set; }
         public DbSet<PointOfInterest> PointOfInterests { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }
