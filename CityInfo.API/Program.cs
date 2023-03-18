@@ -1,10 +1,13 @@
 using CityInfo.API.DBContexts;
 using CityInfo.API.Models;
 using CityInfo.API.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Reflection;
 using System.Text;
 
 namespace CityInfo.API
@@ -33,7 +36,35 @@ namespace CityInfo.API
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(setupAction =>
+            {
+                string fileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+
+                string path = Path.Combine(AppContext.BaseDirectory, fileName);
+
+                setupAction.IncludeXmlComments(path);
+
+                setupAction.AddSecurityDefinition("CityInfoApiSecurity", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    Description = "this is our schema for scure using (Bearer)",
+                });
+
+                setupAction.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "CityInfoApiSecurity"
+                            }
+                        }, new List<string>()
+                    }
+                });
+            });
 
             builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
             builder.Services.AddSingleton<CitiesDataStore>();
@@ -60,6 +91,7 @@ namespace CityInfo.API
                     };
                 });
 
+            // Add Policy
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("mypolicy", policy =>
@@ -67,6 +99,14 @@ namespace CityInfo.API
                     policy.RequireAuthenticatedUser();
                     policy.RequireClaim("city", "city full update(3)");
                 });
+            });
+
+            // Api Versioning
+            builder.Services.AddApiVersioning(setupAction =>
+            {
+                setupAction.AssumeDefaultVersionWhenUnspecified = true;
+                setupAction.DefaultApiVersion = new ApiVersion(1, 0);
+                setupAction.ReportApiVersions = true;
             });
 
 #if DEBUG

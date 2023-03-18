@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CityInfo.API</name>
+    </assembly>
+    <members>
+        <member name="M:CityInfo.API.Controllers.CitiesController.GetCities(System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            This is for get all cities
+            </summary>
+            <param name="name"></param>
+            <param name="searchQuery"></param>
+            <param name="pageNumber"></param>
+            <param name="pageSize"></param>
+            <returns>city withou the points</returns>
+        </member>
+        <member name="M:CityInfo.API.Controllers.CitiesController.GetCity(System.Int32,System.Boolean)">
+            <summary>
+            Getting single city by its id
+            </summary>
+            <param name="id"></param>
+            <param name="includePoint"></param>
+            <returns></returns>
+            <response code="200">Returns the requested city</response>
+        </member>
+        <member name="T:CityInfo.API.Migrations.CityInfoDBAddPointOfInterest">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.CityInfoDBAddPointOfInterest.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.CityInfoDBAddPointOfInterest.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.CityInfoDBAddPointOfInterest.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:CityInfo.API.Migrations.ModifyCityDB">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.ModifyCityDB.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.ModifyCityDB.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.ModifyCityDB.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:CityInfo.API.Migrations.DummyData">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.DummyData.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.DummyData.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.DummyData.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:CityInfo.API.Migrations.UpdateCityInfo">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.UpdateCityInfo.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.UpdateCityInfo.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.UpdateCityInfo.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:CityInfo.API.Migrations.AddUserTable">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.AddUserTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.AddUserTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.AddUserTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:CityInfo.API.Migrations.UpdateUserTable">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.UpdateUserTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.UpdateUserTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CityInfo.API.Migrations.UpdateUserTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:CityInfo.API.Models.CityWithoutPointModel">
+            <summary>
+            city class but without the points of Interests List
+            </summary>
+        </member>
+        <member name="P:CityInfo.API.Models.CityWithoutPointModel.Id">
+            <summary>
+            identifier of city
+            </summary>
+        </member>
+        <member name="P:CityInfo.API.Models.CityWithoutPointModel.Name">
+            <summary>
+            the name of the city
+            </summary>
+        </member>
+        <member name="P:CityInfo.API.Models.CityWithoutPointModel.Description">
+            <summary>
+            information about the city
+            </summary>
+        </member>
+    </members>
+</doc>
