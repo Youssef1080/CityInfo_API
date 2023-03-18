@@ -12,7 +12,7 @@ namespace CityInfo.API.Controllers
 {
     [Route("api/cities/{cityId}/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = "mypolicy")]
     public class PointsOfInterestController : ControllerBase
     {
         private readonly IMailService localMail;
@@ -29,6 +29,12 @@ namespace CityInfo.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PointsOfInteristModel>>> GetAllPointsOfInterest(int cityId)
         {
+            //var cityName = User.Claims.Where(c => c.Type == "city").FirstOrDefault();
+            //if (!await cityInfoRepository.IsCityMatched(cityId, cityName.Value))
+            //{
+            //    return Forbid();
+            //}
+
             if (!await cityInfoRepository.IsCityExist(cityId))
             {
                 return NotFound();
@@ -39,6 +45,7 @@ namespace CityInfo.API.Controllers
         [HttpGet("{id}", Name = "GetPointOfInterest")]
         public async Task<ActionResult<PointsOfInteristModel>> GetPointOfInterest(int cityId, int id)
         {
+            //User.Claims.C
             var pointOfInterest = await cityInfoRepository.GetPointOfInterestAsync(cityId, id);
 
             if (pointOfInterest == null)

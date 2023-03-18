@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 //using Newtonsoft.Json;
@@ -22,7 +23,7 @@ namespace CityInfo.API.Controllers
         private readonly IMailService localMail;
         private readonly ICityInfoRepository cityInfoRepository;
         private readonly IMapper mapper;
-
+        private readonly IHttpClientFactory factory;
         private const int maxSize = 20;
 
         public CitiesController(ILogger<CitiesController> logger, IMailService localMail, ICityInfoRepository cityInfoRepository, IMapper mapper)
