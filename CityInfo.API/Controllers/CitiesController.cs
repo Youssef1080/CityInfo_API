@@ -15,15 +15,17 @@ using System.Text.Json;
 namespace CityInfo.API.Controllers
 {
     [ApiController]
-    [Route("api/cities")]
+    [Route("api/v{version:ApiVersion}/cities")]
     [Authorize]
+    // suppported version
+    [ApiVersion("1.0")]
+    [ApiVersion("2.0")]
     public class CitiesController : ControllerBase
     {
         private readonly ILogger<CitiesController> logger;
         private readonly IMailService localMail;
         private readonly ICityInfoRepository cityInfoRepository;
         private readonly IMapper mapper;
-        private readonly IHttpClientFactory factory;
         private const int maxSize = 20;
 
         public CitiesController(ILogger<CitiesController> logger, IMailService localMail, ICityInfoRepository cityInfoRepository, IMapper mapper)
@@ -34,6 +36,14 @@ namespace CityInfo.API.Controllers
             this.mapper = mapper;
         }
 
+        /// <summary>
+        /// This is for get all cities
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="searchQuery"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns>city withou the points</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CityWithoutPointModel>>> GetCities(string? name, string? searchQuery, int pageNumber = 1, int pageSize = 10)
         {
@@ -49,7 +59,17 @@ namespace CityInfo.API.Controllers
             return Ok(mapper.Map<IEnumerable<CityWithoutPointModel>>(cityEntities));
         }
 
+        /// <summary>
+        /// Getting single city by its id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="includePoint"></param>
+        /// <returns></returns>
+        /// <response code="200">Returns the requested city</response>
         [HttpGet("{id}", Name = "GetCity")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetCity(int id, bool includePoint = false)
         {
             try

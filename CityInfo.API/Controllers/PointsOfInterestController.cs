@@ -10,9 +10,11 @@ using System.Collections.Generic;
 
 namespace CityInfo.API.Controllers
 {
-    [Route("api/cities/{cityId}/[controller]")]
+    [Route("api/cities/{cityId}/[controller]/v{version:ApiVersion}")]
     [ApiController]
-    [Authorize(Policy = "mypolicy")]
+    [Authorize]
+    // supported version
+    [ApiVersion("2.0")]
     public class PointsOfInterestController : ControllerBase
     {
         private readonly IMailService localMail;
