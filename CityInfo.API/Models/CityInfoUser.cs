@@ -18,5 +18,9 @@
             Password = password;
             Id = id;
         }
+
+        public CityInfoUser()
+        {
+        }
     }
 }

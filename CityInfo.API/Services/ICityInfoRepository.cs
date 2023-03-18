@@ -14,6 +14,8 @@ namespace CityInfo.API.Services
 
         public void RemoveCity(City city);
 
+        public Task<bool> IsCityMatched(int id, string cityName);
+
         public Task<IEnumerable<PointOfInterest>> GetPointsOfInterestAsync(int cityId);
 
         public Task<PointOfInterest?> GetPointOfInterestAsync(int cityId, int pointId);
@@ -27,5 +29,7 @@ namespace CityInfo.API.Services
         public Task<bool> IsCityExist(int cityId);
 
         public Task<User> AuthenticateUser(string? username, string? password);
+
+        public Task<User> GetUserAsync(int id);
     }
 }

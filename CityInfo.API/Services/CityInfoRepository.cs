@@ -107,5 +107,15 @@ namespace CityInfo.API.Services
 
             return user;
         }
+
+        public async Task<User> GetUserAsync(int id)
+        {
+            return await context.Users.Where(u => u.Id == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> IsCityMatched(int id, string cityName)
+        {
+            return await context.Cities.AnyAsync(c => c.Id == id && c.Name == cityName);
+        }
     }
 }

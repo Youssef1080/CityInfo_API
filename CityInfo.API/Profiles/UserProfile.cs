@@ -9,6 +9,9 @@ namespace CityInfo.API.Profiles
         public UserProfile()
         {
             CreateMap<User, CityInfoUser>();
+            CreateMap<CityInfoUser, User>();
+            CreateMap<User, UserUpdateModel>();
+            CreateMap<UserUpdateModel, User>();
         }
     }
 }
