@@ -44,20 +44,30 @@ namespace CityInfo.API
 
             builder.Services.AddScoped<ICityInfoRepository, CityInfoRepository>();
 
+            builder.Services.AddHttpClient();
+
             builder.Services.AddAuthentication("Bearer")
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new()
                     {
+                        ValidateIssuerSigningKey = true,
                         ValidateIssuer = true,
                         ValidateAudience = true,
-                        ValidateIssuerSigningKey = true,
                         ValidIssuer = builder.Configuration["Authentication:Issuer"],
                         ValidAudience = builder.Configuration["Authentication:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(builder.Configuration["Authentication:SecretForKey"])),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Authentication:SecretForKey"]))
                     };
                 });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("mypolicy", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("city", "city full update(3)");
+                });
+            });
 
 #if DEBUG
             builder.Services.AddTransient<IMailService, LocalMailService>();
@@ -76,7 +86,9 @@ namespace CityInfo.API
 
             app.UseHttpsRedirection();
 
-            //app.UseRouting();
+            app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
