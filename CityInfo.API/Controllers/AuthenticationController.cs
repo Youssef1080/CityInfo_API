@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
+using CityInfo.API.Entities;
 using CityInfo.API.Models;
 using CityInfo.API.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 
@@ -17,6 +20,7 @@ namespace CityInfo.API.Controllers
         private readonly ICityInfoRepository cityInfo;
         private readonly IMapper mapper;
         private readonly IConfiguration config;
+        private readonly HttpClient client;
 
         public class AuthenticationRequestBody
         {
@@ -30,11 +34,12 @@ namespace CityInfo.API.Controllers
             }
         }
 
-        public AuthenticationController(ICityInfoRepository cityInfo, IMapper mapper, IConfiguration config)
+        public AuthenticationController(ICityInfoRepository cityInfo, IMapper mapper, IConfiguration config, HttpClient client)
         {
             this.cityInfo = cityInfo;
             this.mapper = mapper;
             this.config = config;
+            this.client = client;
         }
 
         [HttpPost]
@@ -66,9 +71,11 @@ namespace CityInfo.API.Controllers
             // using JWT for security
             var jwtSecurityToken = new JwtSecurityToken
                 (config["Authentication:Issuer"], config["Authentication:Audience"],
-                claimsForToken, DateTime.UtcNow, DateTime.UtcNow.AddHours(1), signingCredentials);
+                claimsForToken, DateTime.UtcNow, DateTime.UtcNow.AddDays(1), signingCredentials);
 
             var tokenToReturn = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+
+            //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenToReturn.ToString());
 
             return Ok(tokenToReturn);
         }
